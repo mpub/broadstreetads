@@ -1,3 +1,12 @@
+"""A Broadstreet Ads API wrapper.
+
+This is a thin layer over the python requests library to simplify
+access to the Broadstreet Ads API. It provides the functionality:
+
+    * Serialization and deserialization of data
+    * Convert API errors into python exceptions
+    * Re-trying requests if possible on various errors (TODO)
+"""
 import requests
 
 _missing = object()
