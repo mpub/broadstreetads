@@ -11,6 +11,16 @@ import requests
 
 _missing = object()
 
+class APIError(Exception):
+    """An error response from the broadstreet API."""
+
+    def __init__(self,
+            response):
+        self.response = response
+        self.status_code = response.status_code
+        message = '{response.status_code} {response.content}'.format(response=response)
+        Exception.__init__(self, message)
+
 class APIConnection(object):
 
     def __init__(self,
@@ -35,12 +45,7 @@ class APIConnection(object):
             return None
         if response.status_code >= 200 and response.status_code < 300:
             return response.json()
-        raise Exception("""Non 2xx status\n
-    {response.status_code}
-    {response.headers}
-
-    {response.text}
-""".format(response=response))
+        raise APIError(response)
 
     def get(self, path, _raw=False):
         url = self._url(path)
