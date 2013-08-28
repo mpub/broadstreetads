@@ -147,7 +147,7 @@ def sync_zones(conn, namespace, network, zones):
     ignored = []
     have_zones = {}
     seen = set([])
-    for zone in conn.get_zones(665):
+    for zone in conn.get_zones(network):
         alias = zone.get('alias')
         if not alias or not alias.startswith(namespace + '.'):
             ignored.append(zone['id'])
