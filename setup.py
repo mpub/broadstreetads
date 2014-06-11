@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name="broadstreetads",
-      version="0.1",
+      version="0.2",
       description="Utilities to ease access to the Broadstreet Ads API from python.",
       py_modules=['broadstreetads'],
       license='BSD',
