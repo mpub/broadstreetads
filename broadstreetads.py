@@ -21,7 +21,12 @@ class APIError(Exception):
         message = '{response.status_code} {response.content}'.format(response=response)
         Exception.__init__(self, message)
 
+class APIServerError(APIError):
+    pass
+
 class APIConnection(object):
+
+    API_VERSION = None
 
     def __init__(self,
             access_token,
@@ -41,6 +46,8 @@ class APIConnection(object):
     def _get_result(self, response, raw):
         if raw:
             return response
+        if response.status_code >= 500 and response.status_code < 600:
+            raise APIServerError(response)
         if response.status_code == 204:
             return None
         if response.status_code >= 200 and response.status_code < 300:
