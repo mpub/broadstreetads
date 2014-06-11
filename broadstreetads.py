@@ -7,6 +7,7 @@ access to the Broadstreet Ads API. It provides the functionality:
     * Convert API errors into python exceptions
     * Re-trying requests if possible on various errors (TODO)
 """
+import time
 import requests
 
 _missing = object()
@@ -147,6 +148,10 @@ def sync_zones(conn, namespace, network, zones):
 
     `conn` is a broadstreet API connection.
     """
+    def backoff():
+        # sleep for 50 milliseconds after making a WRITE request so to not
+        # bombard the broadstreet API
+        time.sleep(0.05)
     created = []
     fixed = []
     deleted = []
@@ -166,6 +171,7 @@ def sync_zones(conn, namespace, network, zones):
             # DUPLICATE, let's delete to remove any abiguities
             deleted.append(zone)
             conn.delete_zone(network, zone['id'])
+            backoff()
             continue
         seen.add(alias)
         have_zones[alias] = zone
@@ -173,6 +179,7 @@ def sync_zones(conn, namespace, network, zones):
         if wanted is None:
             deleted.append(zone)
             conn.delete_zone(network, zone['id'])
+            backoff()
         else:
             if wanted['name'] != zone['name']:
                 conn.update_zone(
@@ -180,6 +187,7 @@ def sync_zones(conn, namespace, network, zones):
                         zone['id'],
                         name=wanted['name'])
                 fixed.append(zone['id'])
+                backoff()
             else:
                 unchanged.append(zone['id'])
     for alias, wanted in zones.items():
@@ -188,6 +196,7 @@ def sync_zones(conn, namespace, network, zones):
         ns_alias = namespace + '.' + alias
         created.append(ns_alias)
         conn.create_zone(network, wanted['name'], alias=ns_alias)
+        backoff()
     return dict(
             created=created,
             unchanged=unchanged,
